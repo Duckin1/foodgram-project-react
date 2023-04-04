@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
+from recipes.models import Tag, Ingredient, Recipe
 
 # Create your views here.
 
-User = get_user_model()
+UserModel = get_user_model()
 
 class UserViewSet():
     #pagination_class = PageLimitPagination

@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import DateTimeField, UniqueConstraint, CheckConstraint, Q, F
 
 
 class User(AbstractUser):
@@ -34,10 +33,6 @@ class User(AbstractUser):
         verbose_name='Пароль',
         max_length=128,
     )
-    is_active = models.BooleanField(
-        verbose_name='Активирован',
-        default=True,
-    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -48,13 +43,14 @@ class User(AbstractUser):
         return self.username
 
 
-class Follow(models.Model):
+class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         blank=True,
         null=True,
         on_delete=models.CASCADE,
         related_name='follower',
+        verbose_name='Подписчик'
     )
     author = models.ForeignKey(
         User,
@@ -62,26 +58,15 @@ class Follow(models.Model):
         null=True,
         on_delete=models.CASCADE,
         related_name='following',
-    )
-    follow_date = DateTimeField(
-        verbose_name='Дата создания подписки',
-        auto_now_add=True,
-        editable=False
+        verbose_name='Автор рецепта'
     )
 
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        constraints = (
-            UniqueConstraint(
-                fields=('author', 'user'),
-                name='\nRepeat subscription\n',
-            ),
-            CheckConstraint(
-                check=~Q(author=F('user')),
-                name='\nNo self sibscription\n'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'user'],
+                name='unique_subscribe'
             )
-        )
-
-        def __str__(self) -> str:
-            return f'{self.user.username} -> {self.author.username}'
+        ]
