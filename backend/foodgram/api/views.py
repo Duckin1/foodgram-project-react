@@ -7,7 +7,8 @@ from recipes.models import Tag, Ingredient, Recipe
 UserModel = get_user_model()
 
 class UserViewSet():
-    #pagination_class = PageLimitPagination
+    queryset = UserModel.objects.all()
+
     pass
 
 
