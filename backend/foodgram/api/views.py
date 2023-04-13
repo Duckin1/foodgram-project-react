@@ -1,65 +1,59 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from djoser.views import UserViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from recipes.models import Tag, Ingredient, Recipe
 from .serializers import SubscriptionSerializer
-from users.models import Subscription
+from users.models import Subscription, User
 from rest_framework.permissions import IsAuthenticated
 
 
-UserModel = get_user_model()
+class CustomUserViewSet(UserViewSet):
+    queryset = User.objects.all()
 
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = UserModel.objects.all()
+    serializer_class = SubscriptionSerializer
 
     @action(detail=False, url_path='subscriptions',
             url_name='subscriptions', permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
-        """Список авторов на которых подписан пользователь."""
-        user = request.UserModel
+        """Список авторов, на которых подписан пользователь."""
+        user = request.user
         queryset = user.follower.all()
-        pages = self.paginate_queryser(queryset)
+        pages = self.paginate_queryset(queryset)
         serializer = SubscriptionSerializer(
-            pages, many=True, contex={'request': request}
-        )
+            pages, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
     @action(methods=['post', 'delete'], detail=True, url_path='subscribe',
-             url_name='subscribe', permission_classes=[IsAuthenticated])
+            url_name='subscribe', permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
-        """Подписки на автора."""
-        user = request.UserModel
-        author = get_object_or_404(UserModel, id=id)
+        """Подписка на автора."""
+        user = request.user
+        author = get_object_or_404(User, id=id)
         if user == author:
             return Response(
-                {'errors': 'Нельзя подписаться и отписаться от себя'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        subscription = Subscriptions.objects.filter(
-            author=author, user=user
-        )
+                {'errors': 'На себя нельзя подписаться / отписаться'},
+                status=status.HTTP_400_BAD_REQUEST)
+        subscription = Subscription.objects.filter(
+            author=author, user=user)
         if request.method == 'POST':
             if subscription.exists():
                 return Response(
                     {'errors': 'Нельзя подписаться повторно'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            queryset = Subscriptions.objects.create(author=author, user=user)
-            serializer = SubscriptionsSerializer(
-                queryset, context={'request': request}
-            )
+                    status=status.HTTP_400_BAD_REQUEST)
+            queryset = Subscription.objects.create(author=author, user=user)
+            serializer = SubscriptionSerializer(
+                queryset, context={'request': request})
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             if not subscription.exists():
                 return Response(
                     {'errors': 'Нельзя отписаться повторно'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    status=status.HTTP_400_BAD_REQUEST)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)

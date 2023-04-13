@@ -1,10 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from users.models import Subscription
+from users.models import Subscription, User
 
 from recipes.models import Ingredient, Tag
-
-UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,26 +10,30 @@ class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
-        model = UserModel
+        model = User
         fields = (
-            'email', 'username', 'first_name',
-            'last_name', 'password', 'id', 'is_subscribed'
+            'email', 'id', 'username', 'first_name',
+            'last_name', 'password', 'is_subscribed'
         )
+        write_only_fields = ('password',)
 
     def get_is_subscribed(self, obj):
-        user = self.context['request'].user
+        """Статус подписки на автора."""
+        user_id = self.context.get('request').user.id
+        return Subscription.objects.filter(
+            author=obj.id, user=user_id).exists()
 
-        if user.is_anonymous:
-            return False
-        return Follow.objects.filter(user=user, author=obj).exists()
-
-    def validate(self, data):
-        if 'password' in data:
-            password = make_password(data['password'])
-            data['password'] = password
-            return data
-        else:
-            return data
+    def create(self, validated_data):
+        """Создание нового пользователя."""
+        user = User.objects.create(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
