@@ -7,7 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from recipes.models import Tag, Ingredient, Recipe
-from .serializers import SubscriptionSerializer
+from .filters import CustomSearchFilter
+from .serializers import SubscriptionSerializer, TagSerializer, IngredientSerializer
 from users.models import Subscription, User
 from rest_framework.permissions import IsAuthenticated
 
@@ -57,3 +58,18 @@ class CustomUserViewSet(UserViewSet):
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = None
+    filter_backends = [CustomSearchFilter]
+    search_fields = ('^name',)
+
