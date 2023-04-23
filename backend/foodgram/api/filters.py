@@ -1,13 +1,10 @@
+import django_filters
 from django_filters import ModelMultipleChoiceFilter
 from django_filters.rest_framework import FilterSet, filters
 
-from recipe.models import Recipe, Tag
 
+from recipes.models import Recipe, Tag, Ingredient
 from users.models import User
-
-
-class CustomSearchFilter(filters.SearchFilter):
-    search_param = 'name'
 
 
 class RecipeFilter(FilterSet):
@@ -33,3 +30,14 @@ class RecipeFilter(FilterSet):
     class Meta:
         model = Recipe
         fields = ('tags', 'author')
+
+
+class IngredientFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(
+        field_name='name',
+        lookup_expr='istartswith'
+    )
+
+    class Meta:
+        model = Ingredient
+        fields = ('name', 'measurement_unit')

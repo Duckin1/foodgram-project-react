@@ -1,6 +1,6 @@
 from rest_framework.validators import ValidationError
 
-from recipe.models import Ingredient, Tag
+# from recipes.models import Ingredient, Tag
 
 
 def validate_time(value):
@@ -12,6 +12,7 @@ def validate_time(value):
 
 
 def validate_ingredients(data):
+    """Валидация ингредиентов и количества."""
     if not data:
         raise ValidationError({'ingredients': ['Обязательное поле.']})
     if len(data) < 1:

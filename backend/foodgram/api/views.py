@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework import viewsets
 from recipes.models import Tag, Ingredient, Recipe
-from .filters import CustomSearchFilter
+from .filters import IngredientFilter
 from .serializers import SubscriptionSerializer, TagSerializer, IngredientSerializer
 from users.models import Subscription, User
 from rest_framework.permissions import IsAuthenticated
@@ -70,6 +70,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-    filter_backends = [CustomSearchFilter]
+    filter_backends = [IngredientFilter]
     search_fields = ('^name',)
 
