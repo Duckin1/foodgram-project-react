@@ -2,7 +2,7 @@ version: '3.3'
 services:
 
   frontend:
-    image: duckin1/foodgram_frontend:latest
+    image: duckin1/frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
   db:
@@ -10,9 +10,9 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - ../backend/foodgram/foodgram/.env
   backend:
-    image: duckin1/foodgram_backend:latest
+    image: duckin1/backend:latest
     restart: always
     volumes:
       - static_value:/app_back/static/
@@ -20,7 +20,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./.env
+      - ../backend/foodgram/foodgram/.env
   nginx:
     image: nginx:1.19.3
     ports:
