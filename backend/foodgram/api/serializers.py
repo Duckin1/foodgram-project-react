@@ -1,12 +1,14 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer
+from django.db import transaction
 from django.shortcuts import get_object_or_404
+from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
+from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
+                            ShoppingCart, Tag)
 from rest_framework import serializers
 from users.models import Subscription, User
-from .validators import validate_ingredients, validate_tags
 
-from recipes.models import Ingredient, Tag, Favorite, IngredientAmount, Recipe, ShoppingCart
+from .validators import validate_ingredients, validate_tags
 
 
 class UserSerializer(UserCreateSerializer):
@@ -155,6 +157,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = Tag.objects.filter(id__in=valid_tags)
         recipe.tags.set(tags)
 
+    @transaction.atomic
     def create(self, validated_data):
         """Создание рецепта - writable nested serializers."""
         valid_ingredients = validated_data.pop('ingredients')
@@ -169,9 +172,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         data['ingredients'] = valid_ingredients
         return data
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         """Изменение рецепта - writable nested serializers."""
-        instance.name = validated_data.get('name', instance.name)
+        instance.name = super().update(instance, validated_data)
         instance.image = validated_data.get('image', instance.image)
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(

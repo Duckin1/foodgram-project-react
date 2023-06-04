@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
-
-from recipes.models import Favorite, IngredientAmount, Recipe, ShoppingCart, Ingredient, Tag
+from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
+                            ShoppingCart, Tag)
 
 from .models import Subscription, User
 

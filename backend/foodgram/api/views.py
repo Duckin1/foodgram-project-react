@@ -1,20 +1,22 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.contrib.auth import get_user_model
-from djoser.views import UserViewSet
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from djoser.views import UserViewSet
+from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
+                            ShoppingCart, Tag)
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework import viewsets
-from recipes.models import Tag, Ingredient, Recipe, Ingredient, IngredientAmount, Favorite, ShoppingCart
-from .permissions import AuthorOrReadOnly, AdminOrReadOnly
-from .filters import IngredientFilter, RecipeFilter
-from .serializers import SubscriptionSerializer, TagSerializer, IngredientSerializer, RecipeSerializer, SmallRecipeSerializer
-from users.models import Subscription, User
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from users.models import Subscription, User
+
+from .filters import IngredientFilter, RecipeFilter
+from .permissions import AdminOrReadOnly, AuthorOrReadOnly
+from .serializers import (IngredientSerializer, RecipeSerializer,
+                          SmallRecipeSerializer, SubscriptionSerializer,
+                          TagSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
