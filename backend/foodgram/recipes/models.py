@@ -1,7 +1,8 @@
-from api.validators import validate_time
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+
+from api.validators import validate_time
 
 User = get_user_model()
 

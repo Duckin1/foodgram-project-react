@@ -1,6 +1,6 @@
 from rest_framework.validators import ValidationError
 
-# from recipes.models import Ingredient, Tag
+from recipes.models import Ingredient, Tag
 
 
 def validate_time(value):
@@ -20,16 +20,18 @@ def validate_ingredients(data):
     unique_ingredient = []
     for ingredient in data:
         if not ingredient.get('id'):
-            raise ValidationError({'ingredients': ['Отсутствует id ингредиаента.']})
+            raise ValidationError(
+                {'ingredients': ['Отсутствует id ингредиаента.']})
         id = ingredient.get('id')
         if not Ingredient.objects.filter(id=id).exists():
             raise ValidationError(
                 {'ingredients': ['Нельзя дублировать имена ингредиентов.']}
             )
         unique_ingredient.append(id)
-        amount = int(igredient.get('amount'))
+        amount = int(ingredient.get('amount'))
         if amount < 1:
-            raise ValidationError({'amount': ['Количество не может быть менее 1.']})
+            raise ValidationError(
+                {'amount': ['Количество не может быть менее 1.']})
     return data
 
 

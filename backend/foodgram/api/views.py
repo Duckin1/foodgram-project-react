@@ -1,19 +1,19 @@
-from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
-                            ShoppingCart, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
+                            ShoppingCart, Tag)
 from users.models import Subscription, User
 
 from .filters import IngredientFilter, RecipeFilter
-from .permissions import AdminOrReadOnly, AuthorOrReadOnly
+from .permissions import AuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeSerializer,
                           SmallRecipeSerializer, SubscriptionSerializer,
                           TagSerializer)
@@ -128,7 +128,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.delete_relation(Favorite, user, pk, name)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
     @action(methods=['post', 'delete'], detail=True, url_path='shopping_cart',
             url_name='shopping_cart')
     def shopping_cart(self, request, pk=None):
@@ -149,7 +148,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'В корзине нет товаров', status=status.HTTP_400_BAD_REQUEST)
 
         ingredients = (
-            RecipeIngredient.objects
+            IngredientAmount.objects
             .filter(recipe__recipe_cart__user=request.user)
             .values('ingredient')
             .annotate(total_amount=Sum('amount'))
@@ -166,5 +165,5 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         file = HttpResponse('Покупки:\n' + text, content_type='text/plain')
 
-        file['Content-Disposition'] = (f'attachment; filename=cart.txt')
+        file['Content-Disposition'] = 'attachment; filename=cart.txt'
         return file

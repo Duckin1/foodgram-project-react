@@ -1,11 +1,11 @@
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer
 from drf_base64.fields import Base64ImageField
+from rest_framework import serializers
+
 from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
                             ShoppingCart, Tag)
-from rest_framework import serializers
 from users.models import Subscription, User
 
 from .validators import validate_ingredients, validate_tags
@@ -33,10 +33,10 @@ class UserSerializer(UserCreateSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        followings = Follow.objects.filter(
+        Subscriptions = Subscription.objects.filter(
             user=user, author=obj
         )
-        return followings.exists()
+        return Subscriptions.exists()
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -175,7 +175,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def update(self, instance, validated_data):
         """Изменение рецепта - writable nested serializers."""
-        instance.name = super().update(instance, validated_data)
+        instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
         instance.text = validated_data.get('text', instance.text)
         instance.cooking_time = validated_data.get(
@@ -187,4 +187,4 @@ class RecipeSerializer(serializers.ModelSerializer):
         valid_ingredients = validated_data.get(
             'ingredients', instance.ingredients)
         self.create_ingredient_amount(valid_ingredients, instance)
-        return instance
+        return super().update(instance, validated_data)
