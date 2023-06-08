@@ -1,7 +1,5 @@
 from rest_framework.validators import ValidationError
 
-from recipes.models import Ingredient, Tag
-
 
 def validate_time(value):
     """Валидация поля модели - время приготовления."""
