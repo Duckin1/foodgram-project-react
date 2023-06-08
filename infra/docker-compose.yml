@@ -8,7 +8,9 @@ services:
       - ./.env
 
   web:
-    build: ./
+    build:
+      context: ../backend/foodgram
+      dockerfile: DockerFile
     restart: always
     volumes:
       - static_value:/app/static/
