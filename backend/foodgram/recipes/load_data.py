@@ -8,7 +8,7 @@ import psycopg2
 from dotenv import load_dotenv
 from psycopg2 import Error
 
-PROJECT_BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
+PROJECT_BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 load_dotenv(os.path.join(PROJECT_BASE_DIR / 'infra', '.env'))
 
@@ -30,7 +30,7 @@ def insert_into_base_ingredients():
         )) as conn:
             with conn.cursor() as cursor:
                 with open(
-                        './data/ingredients.json',
+                        '../data/ingredients.json',
                         'r',
                         encoding='utf8'
                 ) as json_file:
