@@ -111,10 +111,10 @@ class SmallRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
-    tags = TagSerializer(read_only=True, many=True)
+    author = UserSerializer()
+    tags = TagSerializer(many=True)
     ingredients = IngredientAmountSerializer(
-        read_only=True, many=True, source='ingredientamount_set'
+        many=True
     )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
@@ -149,16 +149,22 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient=ingredient,
                 amount=ingredient_data.get('amount'))
 
-
-    @transaction.atomic
     def create(self, validated_data):
-        """Создание рецепта - writable nested serializers."""
-        valid_ingredients = validated_data.pop('ingredients')
+        print(validated_data)
+        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
-        self.create_tags(self.initial_data, recipe)
-        self.create_ingredient_amount(valid_ingredients, recipe)
-        return recipe
+        recipe.tags.set(tags_data)
 
+        bulk_create_data = [
+            IngredientAmount(
+                recipe=recipe,
+                ingredient=ingredient_data['ingredient'],
+                amount=ingredient_data['amount'])
+            for ingredient_data in ingredients_data
+        ]
+        IngredientAmount.objects.bulk_create(bulk_create_data)
+        return recipe
 
     @transaction.atomic
     def update(self, instance, validated_data):
