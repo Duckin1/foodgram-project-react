@@ -36,12 +36,12 @@ def insert_into_base_ingredients():
                 ) as json_file:
                     data = json.load(json_file)
                     for line in data:
-                        title = line.get('name')
+                        name = line.get('name')
                         measurement_unit = line.get('measurement_unit')
                         cursor.execute(
-                            f"INSERT INTO recipes_ingredientsmodel("
+                            f"INSERT INTO recipes_ingredient("
                             f"name, measurement_unit"
-                            f") VALUES ('{title}', '{measurement_unit}');")
+                            f") VALUES ('{name}', '{measurement_unit}');")
                         conn.commit()
         logging.info("Соединение с PostgreSQL закрыто")
 
