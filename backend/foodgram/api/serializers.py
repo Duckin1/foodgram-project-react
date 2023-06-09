@@ -157,15 +157,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags_data = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags_data)
-
-        bulk_create_data = [
-            IngredientAmount(
-                recipe=recipe,
-                ingredient=ingredient_data['ingredient'],
-                amount=ingredient_data['amount'])
-            for ingredient_data in ingredients_data
-        ]
-        IngredientAmount.objects.bulk_create(bulk_create_data)
+        self.create_ingredient_amount(ingredients_data, recipe)
         return recipe
 
     @transaction.atomic
