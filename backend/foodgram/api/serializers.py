@@ -8,8 +8,6 @@ from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
                             ShoppingCart, Tag)
 from users.models import Subscription, User
 
-from .validators import validate_ingredients, validate_tags
-
 
 class UserSerializer(UserCreateSerializer):
     is_subscribed = serializers.SerializerMethodField()
