@@ -68,7 +68,7 @@ class CustomUserViewSet(UserViewSet):
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = (AllowAny,)
     serializer_class = TagSerializer
     pagination_class = None
 
@@ -76,7 +76,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = (AllowAny,)
     pagination_class = None
     filter_backends = [IngredientFilter, ]
     search_fields = ('^name',)
