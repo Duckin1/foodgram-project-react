@@ -149,11 +149,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                 ingredient=ingredient,
                 amount=ingredient_data.get('amount'))
 
-    def create_tags(self, data, recipe):
-        """Отправка на валидацию и создание тэгов у рецепта."""
-        valid_tags = validate_tags(data.get('tags'))
-        tags = Tag.objects.filter(id__in=valid_tags)
-        recipe.tags.set(tags)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -164,11 +159,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         self.create_ingredient_amount(valid_ingredients, recipe)
         return recipe
 
-    def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
-        valid_ingredients = validate_ingredients(ingredients)
-        data['ingredients'] = valid_ingredients
-        return data
 
     @transaction.atomic
     def update(self, instance, validated_data):
