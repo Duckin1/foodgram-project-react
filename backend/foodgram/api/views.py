@@ -83,7 +83,6 @@ class IngredientViewSet(
     permission_classes = (AllowAny,)
     pagination_class = None
     filter_backends = [IngredientFilter, ]
-    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
