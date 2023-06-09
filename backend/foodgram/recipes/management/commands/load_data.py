@@ -1,20 +1,53 @@
 import json
+import logging
+import os
+from contextlib import closing
+from pathlib import Path
 
-from django.core.management import BaseCommand
+import psycopg2
+from dotenv import load_dotenv
+from psycopg2 import Error
 
-from recipes.models import Ingredient
+PROJECT_BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
+
+load_dotenv(os.path.join(PROJECT_BASE_DIR / 'infra', '.env'))
+
+DB_NAME = str(os.getenv('DB_NAME'))
+POSTGRES_USER = str(os.getenv('POSTGRES_USER'))
+POSTGRES_PASSWORD = str(os.getenv('POSTGRES_PASSWORD'))
+DB_HOST = str(os.getenv('DB_HOST'))
+DB_PORT = str(os.getenv('DB_PORT'))
 
 
-class Command(BaseCommand):
+def insert_into_base_ingredients():
+    try:
+        with closing(psycopg2.connect(
+                dbname=DB_NAME,
+                user=POSTGRES_USER,
+                password=POSTGRES_PASSWORD,
+                host=DB_HOST,
+                port=DB_PORT
+        )) as conn:
+            with conn.cursor() as cursor:
+                with open(
+                        './data/ingredients.json',
+                        'r',
+                        encoding='utf8'
+                ) as json_file:
+                    data = json.load(json_file)
+                    for line in data:
+                        title = line.get('name')
+                        measurement_unit = line.get('measurement_unit')
+                        cursor.execute(
+                            f"INSERT INTO recipes_ingredientsmodel("
+                            f"name, measurement_unit"
+                            f") VALUES ('{title}', '{measurement_unit}');")
+                        conn.commit()
+        logging.info("Соединение с PostgreSQL закрыто")
 
-    def handle(self, *args, **options):
-        with open('/data/ingredients.json', encoding='utf-8') as f:
-            ingredients = json.load(f)
+    except (Exception, Error) as error:
+        logging.error("Ошибка при работе с PostgreSQL", error)
 
-        for ingredient in ingredients:
-            name = ingredient['name']
-            measurement_unit = ingredient['measurement_unit']
-            Ingredient.objects.create(
-                name=name,
-                measurement_unit=measurement_unit
-            )
+
+if __name__ == "__main__":
+    insert_into_base_ingredients()
