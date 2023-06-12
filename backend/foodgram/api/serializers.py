@@ -3,8 +3,8 @@ from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from drf_extra_fields.fields import Base64ImageField
 
-from recipes.models import (Tag, Ingredient, Recipe,
-                            IngredientAmount)
+from recipes.models import (Ingredient, IngredientAmount, Recipe,
+                            Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import Follow
@@ -168,7 +168,7 @@ class IngredientRecipeGetSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Recipe
+        model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
         validators = (
             UniqueTogetherValidator(
@@ -192,10 +192,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipesSerializer(serializers.ModelSerializer):
-    ingredients = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all(),
-        many=True,
-    )
+    ingredients = IngredientRecipeSerializer(many=True)
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
