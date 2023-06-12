@@ -10,7 +10,7 @@ from psycopg2 import Error
 
 PROJECT_BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-load_dotenv(os.path.join(PROJECT_BASE_DIR / 'infra', '.env'))
+load_dotenv(os.path.join(PROJECT_BASE_DIR / 'infra', '../../infra/.env'))
 
 DB_NAME = str(os.getenv('DB_NAME'))
 POSTGRES_USER = str(os.getenv('POSTGRES_USER'))

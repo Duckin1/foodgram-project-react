@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from recipes.models import (Favorite, Ingredient, IngredientAmount, Recipe,
                             ShoppingCart, Tag)
 
-from .models import Subscription, User
+from .models import Follow, User
 
 
 class CustomUserAdmin(UserAdmin):
@@ -93,7 +93,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 admin.site.unregister(Group)
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
+admin.site.register(Follow, SubscriptionAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
