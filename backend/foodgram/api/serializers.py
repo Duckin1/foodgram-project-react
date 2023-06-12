@@ -155,7 +155,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
         return obj.cart.filter(user=user).exists()
 
     def get_ingredients(self, obj):
-        recipe_ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        recipe_ingredients = IngredientAmount.objects.filter(recipe=obj)
         return IngredientRecipeGetSerializer(recipe_ingredients,
                                              many=True).data
 
@@ -221,7 +221,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         self.fields.pop('tags')
         representation = super().to_representation(instance)
         representation['ingredients'] = IngredientRecipeGetSerializer(
-            RecipeIngredient.objects.filter(recipe=instance), many=True
+            IngredientAmount.objects.filter(recipe=instance), many=True
         ).data
         representation['tags'] = TagSerializer(
             instance.tags, many=True
