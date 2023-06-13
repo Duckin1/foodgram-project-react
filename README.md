@@ -42,4 +42,4 @@
 
 ## Автор
 
-- [Семён Новиков](https://github.com/Duckin1) 
+- [Алмаз Миннибаев](https://github.com/Duckin1) 
