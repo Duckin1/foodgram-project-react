@@ -37,7 +37,7 @@
 7. Соберите статику `sudo docker exec -it infra-web-1 python manage.py collectstatic --no-input`
 8. Из директории `/backend/` Загрузите фикстуры в Базу 
 
-    `sudo docker exec -it app python manage.py loaddata fixtures.json`
+    `sudo docker exec -it infra-web-1 python manage.py loaddata fixtures.json`
 8. Документация к API находится по адресу: <http://130.193.52.139/api/docs/>.
 
 ## Автор
