@@ -3,25 +3,26 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 
-class User(AbstractUser):
-    """Класс пользователя."""
-    email = models.EmailField(
-        max_length=254,
-        verbose_name='email',
-        unique=True
-    )
+class UserModel(AbstractUser):
+    """Класс кастомных пользователей."""
+
     username = models.CharField(
         max_length=150,
-        verbose_name='Логин',
+        verbose_name='Никнейм',
         unique=True,
         validators=[RegexValidator(
             regex=r'^[\w.@+-]+$',
             message='Имя пользователя содержит недопустимый символ'
         )]
     )
+    email = models.EmailField(
+        max_length=254,
+        verbose_name='Электронная почта',
+        unique=True
+    )
     first_name = models.CharField(
         max_length=150,
-        verbose_name='Имя пользователя',
+        verbose_name='Имя',
         blank=True
     )
     last_name = models.CharField(
@@ -29,29 +30,21 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         blank=True
     )
-    password = models.CharField(
-        verbose_name='Пароль',
-        max_length=128,
-    )
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        ordering = ('id',)
-
-    def __str__(self):
-        return self.username
 
 
 class Follow(models.Model):
     user = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='Подписчик'
     )
     author = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Автор'

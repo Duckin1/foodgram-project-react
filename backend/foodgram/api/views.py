@@ -13,8 +13,8 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 
 from users.models import Follow
-from recipes.models import (Favorite, Ingredient, IngredientAmount,
-                            Recipe, ShoppingCart, Tag)
+from recipes.models import (Favorite, IngredientsModel, RecipeIngredient,
+                            RecipesModel, ShoppingCart, TagsModel)
 from .filters import IngredientFilter, RecipeFilter
 from .paginators import PageLimitPagination
 from .serializers import (ChangePasswordSerializer, FollowSerializer,
@@ -23,11 +23,11 @@ from .serializers import (ChangePasswordSerializer, FollowSerializer,
                           TagSerializer, UserLoginSerializer, UserSerializer)
 from .utils import delete_obj, post_obj
 
-User = get_user_model()
+UserModel = get_user_model()
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = UserModel.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (AllowAny,)
@@ -68,7 +68,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def retrieve(self, request, *args, **kwargs):
-        user = get_object_or_404(User, pk=kwargs.get('id'))
+        user = get_object_or_404(UserModel, pk=kwargs.get('id'))
         serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -85,7 +85,7 @@ class SubscribeViewSet(
         serializer.save(
             user=self.request.user,
             author=get_object_or_404(
-                User, pk=self.kwargs.get('id')
+                UserModel, pk=self.kwargs.get('id')
             )
         )
 
@@ -94,7 +94,7 @@ class SubscribeViewSet(
             Follow,
             user=self.request.user,
             author=get_object_or_404(
-                User, pk=self.kwargs.get('id')
+                UserModel, pk=self.kwargs.get('id')
             )
         )
         follow.delete()
@@ -122,14 +122,14 @@ class UserLoginViewSet(
         password = serializer.validated_data.get('password')
         email = serializer.validated_data.get('email')
 
-        if not User.objects.filter(email=email).exists():
+        if not UserModel.objects.filter(email=email).exists():
             message = "This email has already been taken"
             return Response(
                 data=message,
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user = get_object_or_404(User, email=email)
+        user = get_object_or_404(UserModel, email=email)
         if not check_password(password, user.password):
             message = "password is incorrect"
             return Response(
@@ -170,7 +170,7 @@ class TagsViewSet(
     serializer_class = TagSerializer
     pagination_class = None
 
-    queryset = Tag.objects.all()
+    queryset = TagsModel.objects.all()
 
 
 class IngredientsViewSet(
@@ -184,7 +184,7 @@ class IngredientsViewSet(
     filterset_class = IngredientFilter
     pagination_class = None
 
-    queryset = Ingredient.objects.all()
+    queryset = IngredientsModel.objects.all()
 
 
 class RecipesViewSet(
@@ -195,7 +195,7 @@ class RecipesViewSet(
     filterset_class = RecipeFilter
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    queryset = Recipe.objects.all()
+    queryset = RecipesModel.objects.all()
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -211,16 +211,16 @@ class RecipesViewSet(
     def get_queryset(self):
         is_favorited = self.request.query_params.get('is_favorited') or 0
         if int(is_favorited) == 1:
-            return Recipe.objects.filter(
+            return RecipesModel.objects.filter(
                 favorites__user=self.request.user
             )
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart') or 0
         if int(is_in_shopping_cart) == 1:
-            return Recipe.objects.filter(
+            return RecipesModel.objects.filter(
                 cart__user=self.request.user
             )
-        return Recipe.objects.all()
+        return RecipesModel.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -243,7 +243,7 @@ class RecipesViewSet(
             return Response(
                 'В корзине нет товаров', status=status.HTTP_400_BAD_REQUEST)
         ingredients = (
-            IngredientAmount.objects
+            RecipeIngredient.objects
             .filter(recipe__cart__user=request.user)
             .values('ingredient')
             .annotate(total_amount=Sum('amount'))

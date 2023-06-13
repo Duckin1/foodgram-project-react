@@ -2,12 +2,10 @@ from django.contrib.auth import get_user_model
 from django.core import validators
 from django.db import models
 
-from api.validators import validate_time
-
-User = get_user_model()
+UserModel = get_user_model()
 
 
-class Tag(models.Model):
+class TagsModel(models.Model):
     name = models.CharField(
         max_length=100,
         unique=True,
@@ -24,7 +22,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Ingredient(models.Model):
+class IngredientsModel(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
     measurement_unit = models.CharField(
         max_length=200,
@@ -39,9 +37,9 @@ class Ingredient(models.Model):
         return self.name
 
 
-class Recipe(models.Model):
+class RecipesModel(models.Model):
     author = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор рецепта'
@@ -53,12 +51,12 @@ class Recipe(models.Model):
     )
     text = models.TextField()
     ingredients = models.ManyToManyField(
-        Ingredient,
+        IngredientsModel,
         related_name='recipes',
         verbose_name='Ингредиенты'
     )
     tags = models.ManyToManyField(
-        Tag,
+        TagsModel,
         related_name='tags',
         verbose_name='Теги'
     )
@@ -70,23 +68,29 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('-id', )
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('author', 'name'),
+                name='unique_author_name'
+            )
+        ]
 
     def __str__(self):
         return self.name
 
 
-class IngredientAmount(models.Model):
+class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
-        Recipe,
+        RecipesModel,
         on_delete=models.CASCADE,
         related_name='amount',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
-        Ingredient,
+        IngredientsModel,
         on_delete=models.CASCADE,
         related_name='recipe_ingredients',
         verbose_name='Ингредиент'
@@ -99,7 +103,7 @@ class IngredientAmount(models.Model):
     )
 
     class Meta:
-        ordering = ('-id',)
+        ordering = ('-id', )
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
         constraints = [
@@ -116,13 +120,13 @@ class IngredientAmount(models.Model):
 
 class Favorite(models.Model):
     user = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         related_name='favorites',
         verbose_name='Автор списка избранного'
     )
     recipe = models.ForeignKey(
-        Recipe,
+        RecipesModel,
         on_delete=models.CASCADE,
         related_name='favorites',
         verbose_name='Рецепт из списка избранного'
@@ -144,13 +148,13 @@ class Favorite(models.Model):
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
-        User,
+        UserModel,
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Автор списка покупок'
     )
     recipe = models.ForeignKey(
-        Recipe,
+        RecipesModel,
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Список покупок'

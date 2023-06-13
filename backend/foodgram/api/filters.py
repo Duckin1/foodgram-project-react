@@ -1,22 +1,8 @@
 import django_filters
-from django_filters import ModelMultipleChoiceFilter
-from django_filters.rest_framework import FilterSet, filters
+from django.contrib.auth import get_user_model
+from recipes.models import IngredientsModel, RecipesModel, TagsModel
 
-from recipes.models import Ingredient, Recipe, Tag
-from users.models import User
-
-
-class RecipeFilter(django_filters.FilterSet):
-    tags = django_filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        to_field_name='slug',
-        queryset=Tag.objects.all(),
-    )
-    author = django_filters.ModelChoiceFilter(queryset=User.objects.all())
-
-    class Meta:
-        model = Recipe
-        fields = ('tags', 'author')
+UserModel = get_user_model()
 
 
 class IngredientFilter(django_filters.FilterSet):
@@ -26,5 +12,18 @@ class IngredientFilter(django_filters.FilterSet):
     )
 
     class Meta:
-        model = Ingredient
+        model = IngredientsModel
         fields = ('name', 'measurement_unit')
+
+
+class RecipeFilter(django_filters.FilterSet):
+    tags = django_filters.ModelMultipleChoiceFilter(
+        field_name='tags__slug',
+        to_field_name='slug',
+        queryset=TagsModel.objects.all(),
+    )
+    author = django_filters.ModelChoiceFilter(queryset=UserModel.objects.all())
+
+    class Meta:
+        model = RecipesModel
+        fields = ('tags', 'author')
