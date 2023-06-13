@@ -12,8 +12,8 @@ services:
   backend:
     container_name: app
     build:
-      context: ../backend/foodgram
-      dockerfile: ../backend/foodgram/Dockerfile
+      context: ../backend
+      dockerfile: ../backend/Dockerfile
     restart: always
     volumes:
       - static_value:/app/static/
