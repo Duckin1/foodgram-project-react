@@ -27,7 +27,7 @@ password : admin
 - Docker
 
 ## Зависимости
-- Перечислены в файле backend/requirements.txt
+- Перечислены в файле backend/foodgram/requirements.txt
 
 
 ## Для запуска на собственном сервере
