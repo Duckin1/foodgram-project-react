@@ -38,6 +38,7 @@ services:
 
     depends_on:
       - web
+      - frontend
 
 volumes:
   database:
