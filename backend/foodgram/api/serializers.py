@@ -186,6 +186,12 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
         queryset=IngredientsModel.objects.all()
     )
 
+    def validate(self, data):
+        if data.get('amount') < 1:
+            ingredient = IngredientsModel.objects.get(id=data.get('id'))
+            raise serializers.ValidationError(f'{ingredient} не может быть меньше 1')
+        return data
+
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount', 'recipe')

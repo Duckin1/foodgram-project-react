@@ -243,27 +243,23 @@ class RecipesViewSet(
             return Response(
                 'В корзине нет товаров', status=status.HTTP_400_BAD_REQUEST)
         ingredients = (
-            RecipeIngredient.objects
-            .filter(recipe__cart__user=request.user)
-            .values('ingredient')
-            .annotate(total_amount=Sum('amount'))
-            .values_list(
+            RecipeIngredient.objects.filter(
+                recipe__cart__user=request.user).values(
                 'ingredient__name',
-                'total_amount',
-                'ingredient__measurement_unit'
-            )
+                'ingredient__measurement_unit').order_by(
+                'ingredient__name').annotate(total=Sum('amount'))
         )
-
-        text = ''
+        shoping_cart = {}
         for ingredient in ingredients:
-            text += '{} - {} {}. \n'.format(*ingredient)
-
-        file = HttpResponse(
-            f'Покупки:\n {text}', content_type='text/plain'
-        )
-
-        file['Content-Disposition'] = ('attachment; filename=cart.txt')
-        return file
+            name = ingredient['ingredient__name']
+            amount = f'{ingredient["total"]} {ingredient["ingredient__measurement_unit"]}'
+            shoping_cart[name] = amount
+        data = ''
+        for key, value in shoping_cart.items():
+            data += f'{key} - {value}\n'
+        response = HttpResponse(data, content_type='text/plain')
+        response['Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        return response
 
 
 class FollowListViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
